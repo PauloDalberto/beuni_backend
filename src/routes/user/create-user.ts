@@ -1,0 +1,52 @@
+import { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
+import z from "zod";
+import { db } from "../../db/connection";
+import { schema } from "../../db/schema";
+import { BadRequestError } from "../../helpers/api-error";
+import { eq } from "drizzle-orm";
+import bcrypt from 'bcrypt';
+
+export const createUser: FastifyPluginCallbackZod = (app) => {
+  app.post("/register", {
+    schema: {
+      body: z.object({
+        name: z.string().min(1),
+        email: z.string().min(1),
+        password_hash: z.string().min(1),
+        organization_id: z.uuid()
+      })
+    }
+  },
+  async (request, response) => {
+    const { email, name, password_hash, organization_id } = request.body;
+
+    const orgExists = await db.query.organizations.findFirst({
+      where: eq(schema.organizations.id, organization_id)
+    });
+
+    if(!orgExists) {
+      throw new BadRequestError("Organization name not exists");
+    }
+
+    const emailExists = await db.query.users.findFirst({
+      where: eq(schema.users.email, email),
+    });
+
+    if (emailExists) {
+      throw new BadRequestError('Email already exists');
+    }
+
+    const hashPassword = await bcrypt.hash(password_hash, 10)
+
+    const [newUser] = await db.insert(schema.users).values({
+      email,
+      name,
+      password_hash: hashPassword,
+      organization_id
+    }).returning()
+
+    const { password_hash: _, ...createUser } = newUser;
+
+    return response.status(201).send(createUser)
+  })
+}
