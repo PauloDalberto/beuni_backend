@@ -3,9 +3,10 @@ import jwt from "jsonwebtoken";
 import { db } from "../db/connection";
 import { schema } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { env } from "../env";
 
 type JwtPayload = {
-  id: string; // UUID em vez de number, assumindo que o id do user é UUID
+  id: string; 
 };
 
 export async function authMiddleware(
@@ -19,7 +20,7 @@ export async function authMiddleware(
   }
 
   try {
-    const { id } = jwt.verify(token, process.env.JWT_PASS ?? "") as JwtPayload;
+    const { id } = jwt.verify(token, env.JWT_SECRET ?? "") as JwtPayload;
 
     const user = await db.query.users.findFirst({
       where: eq(schema.users.id, id),
@@ -29,10 +30,8 @@ export async function authMiddleware(
       return reply.status(401).send({ error: "Usuário não encontrado!" });
     }
 
-    // Remove a senha antes de anexar ao request
     const { password_hash: _, ...loggedUser } = user;
 
-    // Anexar user ao request (precisa tipar depois)
     request.user = loggedUser;
 
   } catch (error) {
