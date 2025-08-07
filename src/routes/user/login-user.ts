@@ -51,6 +51,6 @@ export const loginUser: FastifyPluginCallbackZod = (app) => {
         maxAge: 60 * 60
       })
       .status(200)
-      .send({ message: 'Login bem-sucedido' })
+      .send({ message: 'Login Success', token })
   })
 }
