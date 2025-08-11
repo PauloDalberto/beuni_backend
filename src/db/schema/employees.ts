@@ -7,7 +7,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 import { departments } from "./departments";
-import { addresses } from "./addresses";
 
 export const employees = pgTable("employees", {
   id: uuid("id").primaryKey().defaultRandom(),
