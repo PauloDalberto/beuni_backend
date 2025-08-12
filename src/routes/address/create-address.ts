@@ -4,7 +4,7 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { BadRequestError } from "../../helpers/api-error";
 import { authMiddleware } from "../../middlewares/auth";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const createAddress: FastifyPluginCallbackZod = (app) => {
   app.post("/addresses", {
