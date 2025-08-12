@@ -4,7 +4,7 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { BadRequestError } from "../../helpers/api-error";
 import { authMiddleware } from "../../middlewares/auth";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const createAddress: FastifyPluginCallbackZod = (app) => {
   app.post("/addresses", {
@@ -31,6 +31,17 @@ export const createAddress: FastifyPluginCallbackZod = (app) => {
 
     if(!employeeExists){
       throw new BadRequestError("The employee not exists");
+    }
+
+    const sameAddress = await db.query.addresses.findFirst({
+      where: and(
+        eq(schema.addresses.cep, cep),
+        eq(schema.addresses.employee_id, employee_id)
+      )
+    });
+
+    if(sameAddress){
+      throw new BadRequestError("The user already has a registration in this zip code")
     }
 
     const [newAddress] = await db.insert(schema.addresses).values({

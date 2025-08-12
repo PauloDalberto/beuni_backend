@@ -7,6 +7,8 @@ import { createDepartment } from "./department/create-department";
 import { getDepartment } from "./department/get-department";
 import { createEmployee } from "./employee/create-employee";
 import { getEmployee } from "./employee/get-employee";
+import { createAddress } from "./address/create-address";
+import { getAddress } from "./address/get-address";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(createOrganization)
@@ -20,4 +22,7 @@ export async function registerRoutes(app: FastifyInstance) {
 
   app.register(createEmployee)
   app.register(getEmployee)
+
+  app.register(createAddress)
+  app.register(getAddress)
 }
