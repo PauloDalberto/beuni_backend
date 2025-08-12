@@ -11,6 +11,7 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
     schema: {
       body: z.object({
         name: z.string().min(1),
+        user_id: z.uuid(),
         department_id: z.uuid(),
         birth_date: z.coerce.date().refine(d => !isNaN(d.getTime()), {
           message: "Invalid date format"
@@ -21,11 +22,22 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
     preHandler: [authMiddleware]
   },
   async (request, response) => {
-    const { birth_date, department_id, job_title, name } = request.body;
+    const { birth_date, department_id, job_title, name, user_id } = request.body;
     const organization_id = request.user.organization_id;
 
     if(!organization_id){
       throw new BadRequestError("Organization ID missing in user")
+    }
+
+    const userExists = await db.query.users.findFirst({
+      where: and(
+        eq(schema.users.id, user_id),
+        eq(schema.users.organization_id, organization_id)
+      )
+    });
+
+    if (!userExists) {
+      throw new BadRequestError("User does not exist in this organization");
     }
 
     const departmentExists = await db.query.departments.findFirst({
@@ -42,6 +54,7 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
     const [newEmployee] = await db.insert(schema.employees).values({
       name,
       job_title,
+      user_id,
       birth_date: birth_date.toISOString().split("T")[0],
       organization_id,
       department_id
