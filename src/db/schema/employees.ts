@@ -14,7 +14,6 @@ export const employees = pgTable("employees", {
   organization_id: uuid("organization_id").notNull().references(() => organizations.id),
   department_id: uuid("department_id").references(() => departments.id),
   user_id: uuid("user_id").notNull().references(() => users.id),
-  name: varchar("name", { length: 100 }).notNull(),
   birth_date: date("birth_date").notNull(),
   job_title: varchar("job_title", { length: 100 }).notNull(),
   created_at: timestamp("created_at").defaultNow().notNull(),

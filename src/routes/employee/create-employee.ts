@@ -10,7 +10,6 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
   app.post("/employees", {
     schema: {
       body: z.object({
-        name: z.string().min(1),
         user_id: z.uuid(),
         department_id: z.uuid(),
         birth_date: z.coerce.date().refine(d => !isNaN(d.getTime()), {
@@ -22,7 +21,7 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
     preHandler: [authMiddleware]
   },
   async (request, response) => {
-    const { birth_date, department_id, job_title, name, user_id } = request.body;
+    const { birth_date, department_id, job_title, user_id } = request.body;
     const organization_id = request.user.organization_id;
 
     if(!organization_id){
@@ -52,7 +51,6 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
     }
 
     const [newEmployee] = await db.insert(schema.employees).values({
-      name,
       job_title,
       user_id,
       birth_date: birth_date.toISOString().split("T")[0],
