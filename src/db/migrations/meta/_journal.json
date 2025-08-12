@@ -15,6 +15,13 @@
       "when": 1754402418095,
       "tag": "0001_common_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755001272963,
+      "tag": "0002_high_cloak",
+      "breakpoints": true
     }
   ]
 }
