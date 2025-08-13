@@ -13,6 +13,8 @@ import { getGift } from "./gift/get-gift";
 import { getGiftId } from "./gift/get-gift-id";
 import { createGift } from "./gift/create-gift";
 import { uptadeGift } from "./gift/uptade-gift";
+import { getBirthdayMonth } from "./employee/get-birthday-month";
+import { getBirthdayDepartment } from "./employee/get-bithday-department";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(createOrganization)
@@ -26,6 +28,8 @@ export async function registerRoutes(app: FastifyInstance) {
 
   app.register(createEmployee)
   app.register(getEmployee)
+  app.register(getBirthdayMonth)
+  app.register(getBirthdayDepartment)
 
   app.register(createAddress)
   app.register(getAddress)
