@@ -10,7 +10,7 @@ export const uptadeGift: FastifyPluginCallbackZod = (app) => {
   app.patch("/gifts/:id", {
     schema: {
       params: z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
       }),
       body: z.object({
         gift_type: z.string().optional(),
