@@ -1,5 +1,7 @@
 import 'dotenv/config'
 
+import './utils/send-birthday-gift.ts'
+
 import fastify from "fastify";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 import { env } from "./env";
