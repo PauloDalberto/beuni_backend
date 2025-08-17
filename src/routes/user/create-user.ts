@@ -3,7 +3,7 @@ import z from "zod";
 import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { BadRequestError } from "../../helpers/api-error";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import bcrypt from 'bcrypt';
 
 export const createUser: FastifyPluginCallbackZod = (app) => {
@@ -28,6 +28,16 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
       throw new BadRequestError("Organization name not exists");
     }
 
+    const usersCount = await db
+      .select({ count: sql<string>`count(*)` }) 
+      .from(schema.users)
+      .where(eq(schema.users.organization_id, organization_id));
+
+    const isFirstUser = Number(usersCount[0].count) === 0;
+
+    const role = isFirstUser ? "admin" : "user";
+
+
     const emailExistsOnOrg = await db.query.users.findFirst({
       where: and(
         eq(schema.users.email, email),
@@ -45,7 +55,8 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
       email,
       name,
       password: hashPassword,
-      organization_id
+      organization_id,
+      role
     }).returning()
 
     const { password: _, ...createUser } = newUser;

@@ -12,8 +12,7 @@ export const createOrganization: FastifyPluginCallbackZod = (app) => {
       body: z.object({
         name: z.string().min(1),
       })
-    },
-    preHandler: [authMiddleware]
+    }
   },
   async (request, response) => {
     const { name } = request.body;
