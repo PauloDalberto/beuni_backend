@@ -12,13 +12,13 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
       body: z.object({
         name: z.string().min(1),
         email: z.string().min(1),
-        password_hash: z.string().min(1),
+        password: z.string().min(1),
         organization_id: z.uuid()
       })
     }
   },
   async (request, response) => {
-    const { email, name, password_hash, organization_id } = request.body;
+    const { email, name, password, organization_id } = request.body;
 
     const orgExists = await db.query.organizations.findFirst({
       where: eq(schema.organizations.id, organization_id)
@@ -39,16 +39,16 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
       throw new BadRequestError('Email already exists');
     }
 
-    const hashPassword = await bcrypt.hash(password_hash, 10)
+    const hashPassword = await bcrypt.hash(password, 10)
 
     const [newUser] = await db.insert(schema.users).values({
       email,
       name,
-      password_hash: hashPassword,
+      password: hashPassword,
       organization_id
     }).returning()
 
-    const { password_hash: _, ...createUser } = newUser;
+    const { password: _, ...createUser } = newUser;
 
     return response.status(201).send(createUser)
   })

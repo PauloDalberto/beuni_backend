@@ -8,6 +8,7 @@ import { env } from "./env";
 import { errorMiddleware } from "./middlewares/error";
 import { registerRoutes } from "./routes";
 import cookie from '@fastify/cookie'
+import cors from '@fastify/cors'
 
 async function startServer(){
   const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
@@ -18,6 +19,11 @@ async function startServer(){
   app.register(cookie, {
     secret: env.COOKIE_SECRET,
     hook: 'onRequest'
+  })
+
+  app.register(cors, {
+    origin: 'http://localhost:3000',
+    credentials: true
   })
   
   app.get('/health', () => {
