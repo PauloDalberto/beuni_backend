@@ -30,7 +30,7 @@ export const loginUser: FastifyPluginCallbackZod = (app) => {
       throw new UnauthorizedError("Invalid Credentials")
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password_hash)
+    const passwordMatch = await bcrypt.compare(password, user.password)
 
     if (!passwordMatch) {
       throw new UnauthorizedError("Invalid Credentials")
@@ -42,6 +42,8 @@ export const loginUser: FastifyPluginCallbackZod = (app) => {
       { expiresIn: '1h' }
     )
 
+    const { password: _, ...userWithoutPassword } = user;
+
     response
       .setCookie('token', token, {
         path: '/',
@@ -51,6 +53,6 @@ export const loginUser: FastifyPluginCallbackZod = (app) => {
         maxAge: 60 * 60
       })
       .status(200)
-      .send({ message: 'Login Success', token })
+      .send({ message: 'Login Success', token, user: userWithoutPassword })
   })
 }

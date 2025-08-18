@@ -4,7 +4,6 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { BadRequestError } from "../../helpers/api-error";
 import { eq } from 'drizzle-orm';
-import { authMiddleware } from "../../middlewares/auth";
 
 export const createOrganization: FastifyPluginCallbackZod = (app) => {
   app.post("/organizations", {
