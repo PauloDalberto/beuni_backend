@@ -36,6 +36,13 @@
       "when": 1755465532239,
       "tag": "0004_dusty_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755532185894,
+      "tag": "0005_thin_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

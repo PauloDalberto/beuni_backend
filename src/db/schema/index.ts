@@ -3,6 +3,7 @@ import { departments } from "./departments";
 import { employees } from "./employees";
 import { gifts, giftStatus } from "./gifts";
 import { organizations } from "./organizations";
+import { usersOrganizations } from "./user-organizations";
 import { userRoles, users } from "./users";
 
 export const schema = {
@@ -13,5 +14,6 @@ export const schema = {
   gifts,
   addresses,
   giftStatus,
-  userRoles
+  userRoles,
+  usersOrganizations
 }

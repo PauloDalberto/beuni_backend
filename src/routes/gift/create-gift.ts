@@ -12,6 +12,7 @@ export const createGift: FastifyPluginCallbackZod = (app) => {
       body: z.object({
         employee_id: z.uuid(),
         gift_type: z.string(),
+        organization_id: z.uuid(),
         send_date: z.coerce.date(),
         delivery_date: z.coerce.date()
       })
@@ -19,11 +20,29 @@ export const createGift: FastifyPluginCallbackZod = (app) => {
     preHandler: [authMiddleware]
   },
   async (request, response) => {
-    const { delivery_date, employee_id, gift_type, send_date } = request.body;
-    const organization_id = request.user.organization_id;
+    const { delivery_date, employee_id, gift_type, send_date, organization_id } = request.body;
 
-    if(!organization_id){
-      throw new BadRequestError("Organization ID missing in user")
+    const orgExists = await db.query.organizations.findFirst({
+      where: eq(schema.organizations.id, organization_id)
+    });
+
+    if (!orgExists) {
+      throw new BadRequestError("Organization does not exist");
+    }
+
+    if (!request.user.id) {
+      throw new BadRequestError("User ID is missing");
+    }
+
+    const userBelongsToOrg = await db.query.usersOrganizations.findFirst({
+      where: and(
+        eq(schema.usersOrganizations.userId, request.user.id),
+        eq(schema.usersOrganizations.organizationId, organization_id)
+      )
+    });
+
+    if (!userBelongsToOrg) {
+      throw new BadRequestError("You do not belong to this organization");
     }
 
     const employeeExists = await db.query.employees.findFirst({

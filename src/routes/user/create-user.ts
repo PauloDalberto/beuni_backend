@@ -28,39 +28,44 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
       throw new BadRequestError("Organization name not exists");
     }
 
-    const usersCount = await db
-      .select({ count: sql<string>`count(*)` }) 
-      .from(schema.users)
-      .where(eq(schema.users.organization_id, organization_id));
+    let user = await db.query.users.findFirst({ where: eq(schema.users.email, email) });
 
-    const isFirstUser = Number(usersCount[0].count) === 0;
+    if (!user) {
+      const hashPassword = await bcrypt.hash(password, 10)
+      const [newUser] = await db.insert(schema.users).values({
+        email,
+        name,
+        password: hashPassword
+      }).returning();
+      user = newUser;
+    }
 
-    const role = isFirstUser ? "admin" : "user";
-
-
-    const emailExistsOnOrg = await db.query.users.findFirst({
+    const userOrgExists = await db.query.usersOrganizations.findFirst({
       where: and(
-        eq(schema.users.email, email),
-        eq(schema.users.organization_id, organization_id)
+        eq(schema.usersOrganizations.userId, user.id),
+        eq(schema.usersOrganizations.organizationId, organization_id)
       )
     });
 
-    if (emailExistsOnOrg) {
-      throw new BadRequestError('Email already exists');
+    if(userOrgExists) {
+      throw new BadRequestError("User already belongs to this organization");
     }
 
-    const hashPassword = await bcrypt.hash(password, 10)
+    const orgUsersCount = await db
+      .select({ count: sql<string>`count(*)` })
+      .from(schema.usersOrganizations)
+      .where(eq(schema.usersOrganizations.organizationId, organization_id));
 
-    const [newUser] = await db.insert(schema.users).values({
-      email,
-      name,
-      password: hashPassword,
-      organization_id,
+    const role = Number(orgUsersCount[0].count) === 0 ? "admin" : "user";
+
+    await db.insert(schema.usersOrganizations).values({
+      userId: user.id,
+      organizationId: organization_id,
       role
-    }).returning()
+    });
 
-    const { password: _, ...createUser } = newUser;
+    const { password: _, ...userSafe } = user;
 
-    return response.status(201).send(createUser)
+    return response.status(201).send({ user: userSafe })
   })
 }

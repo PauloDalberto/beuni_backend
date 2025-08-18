@@ -10,14 +10,29 @@ export const getBirthdayDepartment: FastifyPluginCallbackZod = (app) => {
   app.get("/employees/birthdays/department", {
     schema: {
       querystring: z.object({
-        department_id: z.uuid()
+        department_id: z.uuid(),
+        organization_id: z.uuid()
       })
     },
     preHandler: [authMiddleware]
   },
   async (request, response) => {
-    const { department_id } = request.query;
-    const organization_id = request.user.organization_id;
+    const { department_id, organization_id } = request.query;
+
+    if (!request.user.id) {
+      throw new BadRequestError("User ID is missing");
+    }
+
+    const userOrgs = await db.query.usersOrganizations.findFirst({
+      where: and(
+        eq(schema.usersOrganizations.userId, request.user.id),
+        eq(schema.usersOrganizations.organizationId, organization_id)
+      )
+    });
+
+    if (!userOrgs) {
+      throw new BadRequestError("User does not belong to this organization");
+    }
 
     if (!organization_id) {
       throw new BadRequestError("Organization ID missing in user");

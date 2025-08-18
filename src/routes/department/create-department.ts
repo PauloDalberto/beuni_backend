@@ -10,17 +10,21 @@ export const createDepartment: FastifyPluginCallbackZod = (app) => {
   app.post("/departments", {
     schema: {
       body: z.object({
-        name: z.string().min(1)
+        name: z.string().min(1),
+        organization_id: z.uuid()
       })
     },
     preHandler: [authMiddleware]
   },
   async (request, response) => {
-    const { name } = request.body;
-    const organization_id = request.user.organization_id;
+    const { name, organization_id } = request.body;
 
-    if (!organization_id) {
-      throw new BadRequestError("Organization ID missing in user");
+    const orgExists = await db.query.organizations.findFirst({
+      where: eq(schema.organizations.id, organization_id)
+    });
+
+    if (!orgExists) {
+      throw new BadRequestError("Organization does not exist");
     }
 
     const departmentExists = await db.query.departments.findFirst({
