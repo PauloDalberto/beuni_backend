@@ -1,29 +1,18 @@
 import { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
-import z from "zod";
 import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
-import { NotFoundError } from "../../helpers/api-error";
 
 export const getUserOrganizations: FastifyPluginCallbackZod = (app) => {
-  app.post("/user/organizations", {
-    schema: {
-      body: z.object({
-        user_id: z.uuid()
-      })
-    },
+  app.get("/user/organizations", {
     preHandler: [authMiddleware]
-  },
+  }, 
   async (request, response) => {
-    const { user_id } = request.body;
+    const user_id = request.user.id;
 
-    const user = await db.query.users.findFirst({
-      where: eq(schema.users.id, user_id)
-    });
-
-    if(!user){
-      throw new NotFoundError("User doesnt exists")
+    if (!user_id) {
+      throw new Error("userId is missing!");
     }
 
     const userOrgs = await db.select({
