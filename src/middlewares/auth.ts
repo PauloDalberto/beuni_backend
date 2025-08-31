@@ -30,7 +30,7 @@ export async function authMiddleware(
       return reply.status(401).send({ error: "Usuário não encontrado!" });
     }
 
-    const { password_hash: _, ...loggedUser } = user;
+    const { password: _, ...loggedUser } = user;
 
     request.user = loggedUser;
 
