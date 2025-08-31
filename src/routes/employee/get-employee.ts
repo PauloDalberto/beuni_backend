@@ -4,6 +4,7 @@ import { schema } from "../../db/schema";
 import { eq, getTableColumns } from "drizzle-orm";
 import z from "zod";
 import { authMiddleware } from "../../middlewares/auth";
+import { authorize } from "../../middlewares/authorize";
 
 export const getEmployee: FastifyPluginCallbackZod = (app) => {
   app.get("/employees/:organizationId", {
@@ -12,7 +13,7 @@ export const getEmployee: FastifyPluginCallbackZod = (app) => {
         organizationId: z.uuid(),
       }),
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
   }, async (request) => {
     const { organizationId } = request.params;
     const employeeColumns = getTableColumns(schema.employees)

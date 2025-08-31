@@ -5,6 +5,7 @@ import { authMiddleware } from "../../middlewares/auth";
 import z from "zod";
 import { BadRequestError } from "../../helpers/api-error";
 import { sql, and, eq, getTableColumns } from "drizzle-orm";
+import { authorize } from "../../middlewares/authorize";
 
 export const getBirthdayDepartment: FastifyPluginCallbackZod = (app) => {
   app.get("/employees/birthdays/department", {
@@ -14,7 +15,7 @@ export const getBirthdayDepartment: FastifyPluginCallbackZod = (app) => {
         organization_id: z.uuid()
       })
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
   },
   async (request, response) => {
     const { department_id, organization_id } = request.query;

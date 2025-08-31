@@ -3,10 +3,11 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
+import { authorize } from "../../middlewares/authorize";
 
 export const getUserOrganizations: FastifyPluginCallbackZod = (app) => {
   app.get("/user/organizations", {
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
   }, 
   async (request, response) => {
     const user_id = request.user.id;

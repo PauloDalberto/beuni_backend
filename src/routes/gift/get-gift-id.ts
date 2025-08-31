@@ -5,6 +5,7 @@ import z from "zod";
 import { authMiddleware } from "../../middlewares/auth";
 import { eq } from "drizzle-orm";
 import { NotFoundError } from "../../helpers/api-error";
+import { authorize } from "../../middlewares/authorize";
 
 export const getGiftId: FastifyPluginCallbackZod = (app) => {
   app.get("/gifts/:id", {
@@ -13,7 +14,7 @@ export const getGiftId: FastifyPluginCallbackZod = (app) => {
         id: z.uuid(),
       })
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
   },
   async (request, response) => {
     const { id } = request.params;
