@@ -7,7 +7,7 @@ import { authorize } from "../../middlewares/authorize";
 
 export const getUserOrganizations: FastifyPluginCallbackZod = (app) => {
   app.get("/user/organizations", {
-    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'], false)]
   }, 
   async (request, response) => {
     const user_id = request.user.id;
