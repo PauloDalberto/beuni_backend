@@ -5,6 +5,7 @@ import { db } from "../../db/connection";
 import { NotFoundError } from "../../helpers/api-error";
 import { eq } from "drizzle-orm";
 import { schema } from "../../db/schema";
+import { authorize } from "../../middlewares/authorize";
 
 export const uptadeGift: FastifyPluginCallbackZod = (app) => {
   app.patch("/gifts/:id", {
@@ -19,7 +20,7 @@ export const uptadeGift: FastifyPluginCallbackZod = (app) => {
         delivery_date: z.coerce.date().optional(),
       }),
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager'])]
   },
   async (request, response) => {
     const { id } = request.params;

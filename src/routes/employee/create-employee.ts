@@ -5,6 +5,7 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { and, eq } from "drizzle-orm";
 import { BadRequestError } from "../../helpers/api-error";
+import { authorize } from "../../middlewares/authorize";
 
 export const createEmployee: FastifyPluginCallbackZod = (app) => {
   app.post("/employees", {
@@ -19,7 +20,7 @@ export const createEmployee: FastifyPluginCallbackZod = (app) => {
         organization_id: z.uuid()
       })
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager'])]
   },
   async (request, response) => {
     const { birth_date, department_id, job_title, user_id, organization_id } = request.body;

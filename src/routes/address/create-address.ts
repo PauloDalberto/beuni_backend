@@ -5,6 +5,7 @@ import { schema } from "../../db/schema";
 import { BadRequestError } from "../../helpers/api-error";
 import { authMiddleware } from "../../middlewares/auth";
 import { and, eq } from "drizzle-orm";
+import { authorize } from "../../middlewares/authorize";
 
 export const createAddress: FastifyPluginCallbackZod = (app) => {
   app.post("/addresses", {
@@ -20,7 +21,7 @@ export const createAddress: FastifyPluginCallbackZod = (app) => {
         employee_id: z.uuid(),
       })
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
   },
   async (request, response) => {
     const { cep, complement, employee_id, neighborhood, number, state, street, city } = request.body;  

@@ -5,6 +5,7 @@ import { db } from "../../db/connection";
 import { schema } from "../../db/schema";
 import { and, eq } from "drizzle-orm";
 import { BadRequestError } from "../../helpers/api-error";
+import { authorize } from "../../middlewares/authorize";
 
 export const createGift: FastifyPluginCallbackZod = (app) => {
   app.post("/gifts", {
@@ -17,7 +18,7 @@ export const createGift: FastifyPluginCallbackZod = (app) => {
         delivery_date: z.coerce.date()
       })
     },
-    preHandler: [authMiddleware]
+    preHandler: [authMiddleware, authorize(['admin', 'manager'])]
   },
   async (request, response) => {
     const { delivery_date, employee_id, gift_type, send_date, organization_id } = request.body;
