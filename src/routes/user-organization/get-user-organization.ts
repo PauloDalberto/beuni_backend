@@ -19,6 +19,7 @@ export const getUserOrganizations: FastifyPluginCallbackZod = (app) => {
     const userOrgs = await db.select({
       orgId: schema.organizations.id,
       orgName: schema.organizations.name,
+      role: schema.usersOrganizations.role
     })
     .from(schema.usersOrganizations)
     .innerJoin(
