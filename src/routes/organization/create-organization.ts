@@ -10,11 +10,12 @@ export const createOrganization: FastifyPluginCallbackZod = (app) => {
     schema: {
       body: z.object({
         name: z.string().min(1),
+        userId: z.uuid()
       })
     }
   },
   async (request, response) => {
-    const { name } = request.body;
+    const { name, userId } = request.body;
 
     const orgExists = await db.query.organizations.findFirst({
       where: eq(schema.organizations.name, name)
@@ -24,14 +25,20 @@ export const createOrganization: FastifyPluginCallbackZod = (app) => {
       throw new BadRequestError("Organization name already exists");
     }
 
-    const result = await db.insert(schema.organizations).values({
-      name
-    }).returning()
+    const [org] = await db.insert(schema.organizations).values({
+      name,
+    }).returning();
 
-    if(result.length === 0) {
-      throw new BadRequestError("An error occurred while sending the data")
+    if (!org) {
+      throw new BadRequestError("An error occurred while creating organization");
     }
 
-    return response.status(201).send(result)
+    await db.insert(schema.usersOrganizations).values({
+      userId,
+      organizationId: org.id,
+      role: "admin", 
+    });
+
+    return response.status(201).send(org);
   })
 }

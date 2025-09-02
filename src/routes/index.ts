@@ -18,10 +18,12 @@ import { getBirthdayDepartment } from "./employee/get-bithday-department";
 import { getUserOrganizations } from "./user-organization/get-user-organization";
 import { logoutUser } from "./user/logout-user";
 import { uptadeRoleUser } from "./user/uptade-role-user";
+import { joinOrganization } from "./organization/join-organization";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(createOrganization)
   app.register(getOrganization)
+  app.register(joinOrganization)
 
   app.register(createUser)
   app.register(loginUser)

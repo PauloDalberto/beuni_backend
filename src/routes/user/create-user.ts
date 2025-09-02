@@ -13,59 +13,30 @@ export const createUser: FastifyPluginCallbackZod = (app) => {
         name: z.string().min(1),
         email: z.string().min(1),
         password: z.string().min(1),
-        organization_id: z.uuid()
       })
     }
   },
   async (request, response) => {
-    const { email, name, password, organization_id } = request.body;
+    const { email, name, password } = request.body;
 
-    const orgExists = await db.query.organizations.findFirst({
-      where: eq(schema.organizations.id, organization_id)
+    const existing = await db.query.users.findFirst({
+      where: eq(schema.users.email, email),
     });
 
-    if(!orgExists) {
-      throw new BadRequestError("Organization name not exists");
-    }
+    if (existing) {
+      throw new BadRequestError("Email already exits");
+    } 
 
-    let user = await db.query.users.findFirst({ where: eq(schema.users.email, email) });
+    const hashPassword = await bcrypt.hash(password, 10);
 
-    if (!user) {
-      const hashPassword = await bcrypt.hash(password, 10)
-      const [newUser] = await db.insert(schema.users).values({
-        email,
-        name,
-        password: hashPassword
-      }).returning();
-      user = newUser;
-    }
+    const [user] = await db.insert(schema.users).values({
+      email,
+      name,
+      password: hashPassword,
+    }).returning();
 
-    const userOrgExists = await db.query.usersOrganizations.findFirst({
-      where: and(
-        eq(schema.usersOrganizations.userId, user.id),
-        eq(schema.usersOrganizations.organizationId, organization_id)
-      )
-    });
-
-    if(userOrgExists) {
-      throw new BadRequestError("User already belongs to this organization");
-    }
-
-    const orgUsersCount = await db
-      .select({ count: sql<string>`count(*)` })
-      .from(schema.usersOrganizations)
-      .where(eq(schema.usersOrganizations.organizationId, organization_id));
-
-    const role = Number(orgUsersCount[0].count) === 0 ? "admin" : "user";
-
-    await db.insert(schema.usersOrganizations).values({
-      userId: user.id,
-      organizationId: organization_id,
-      role
-    });
-
-    const { password: _, ...userSafe } = user;
-
-    return response.status(201).send({ user: userSafe })
+    const { password: _, ...safeUser } = user;
+    
+    return response.status(201).send({ user: safeUser });
   })
 }
