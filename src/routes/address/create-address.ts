@@ -21,7 +21,7 @@ export const createAddress: FastifyPluginCallbackZod = (app) => {
         employee_id: z.uuid(),
       })
     },
-    preHandler: [authMiddleware, authorize(['admin', 'manager', 'user'])]
+    preHandler: [authMiddleware, authorize(['admin', 'manager'], false)]
   },
   async (request, response) => {
     const { cep, complement, employee_id, neighborhood, number, state, street, city } = request.body;  
