@@ -43,6 +43,13 @@
       "when": 1755532185894,
       "tag": "0005_thin_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757344827594,
+      "tag": "0006_gigantic_sheva_callister",
+      "breakpoints": true
     }
   ]
 }
