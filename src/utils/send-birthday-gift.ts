@@ -3,10 +3,9 @@ import { sendBirthdayGifts } from "../services/schedule-birthday-gifts";
 
 cron.schedule("0 8 * * *", async () => {
   try {
-    await sendBirthdayGifts()
+    const updated = await sendBirthdayGifts();
+    console.log(`${updated} gifts enviados hoje.`);
   } catch (error) {
-    console.log(error)
-    throw new Error("Error cron")
+    console.error("Erro no cron:", error);
   }
-})
-
+});

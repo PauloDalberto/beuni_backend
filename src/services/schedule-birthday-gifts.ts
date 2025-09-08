@@ -1,26 +1,27 @@
 import { db } from "../db/connection";
 import { schema } from "../db/schema";
-import { addBusinessDays, format } from "date-fns";
-import { sql, eq } from "drizzle-orm";
+import { format } from "date-fns";
+import { eq, and, lte } from "drizzle-orm";
 
 export async function sendBirthdayGifts() {
-  const today = new Date();
+  const todayStr = format(new Date(), "yyyy-MM-dd");
 
-  const targetDate = addBusinessDays(today, 7);
-  const targetDateStr = format(targetDate, "yyyy-MM-dd");
-
-  const employeesToSend = await db
+  const giftsToSend = await db
     .select()
-    .from(schema.employees)
-    .where(sql`TO_CHAR(${schema.employees.birth_date}, 'MM-DD') = TO_CHAR(${targetDateStr}::date, 'MM-DD')`);
+    .from(schema.gifts)
+    .where(
+      and(
+        eq(schema.gifts.status, "pending"),
+        lte(schema.gifts.send_date, todayStr)
+      )
+    );
 
-  for (const employee of employeesToSend) {
+  for (const gift of giftsToSend) {
     await db
       .update(schema.gifts)
-      .set({
-        status: "sent",
-        send_date: format(today, "yyyy-MM-dd")
-      })
-      .where(eq(schema.gifts.employee_id, employee.id));
+      .set({ status: "sent" })
+      .where(eq(schema.gifts.id, gift.id));
   }
+
+  return giftsToSend.length;
 }
