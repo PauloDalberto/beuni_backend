@@ -8,7 +8,7 @@ import { NotFoundError } from "../../helpers/api-error";
 import { authorize } from "../../middlewares/authorize";
 
 export const getGiftId: FastifyPluginCallbackZod = (app) => {
-  app.get("/gifts/:id", {
+  app.get("/gift/:id", {
     schema: {
       params: z.object({
         id: z.uuid(),
