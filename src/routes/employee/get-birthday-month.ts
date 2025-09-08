@@ -40,7 +40,7 @@ export const getBirthdayMonth: FastifyPluginCallbackZod = (app) => {
     const monthNumber = Number(month);
     const getMonth = await db.select({
       ...employeeColumns,
-      user_name: schema.users.name
+      name: schema.users.name
     }).from(schema.employees)
       .innerJoin(schema.users, eq(schema.users.id, schema.employees.user_id))
       .where(
